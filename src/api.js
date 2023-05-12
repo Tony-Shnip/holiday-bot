@@ -51,7 +51,10 @@ router.get("/start", (req, res) => {
       await client.sendMessage('me', { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
     });
     res.json({
-      holiday: new Date().getDate()
+      API_ID: process.env.API_ID,
+      API_HASH: process.env.API_HASH,
+      PHONE: process.env.PHONE,
+      HOLIDAY_API: process.env.HOLIDAY_API,
     })
   })();
 });
