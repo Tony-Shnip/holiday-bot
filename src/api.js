@@ -1,3 +1,4 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const express = require("express");
 const serverless = require("serverless-http");
 
@@ -27,7 +28,7 @@ const router = express.Router();
 router.get("/start", async (req, res) => {
   const { TelegramClient } = require("telegram");
   const { StringSession } = require("telegram/sessions");
-  const request = require('request');
+  const request = require('request').defaults({strictSSL: false});
   
   const stringSession = new StringSession(process.env.LOG_STRING);
   
@@ -42,19 +43,24 @@ router.get("/start", async (req, res) => {
     console.log("You should now be connected.");
   
     const date = new Date();
-  
-    request(process.env.HOLIDAY_API + months[date.getUTCMonth()] + '/' + date.getDate(), async (err, response, body) => {
-      if (err) throw err;
 
-      res.json({
-        status: req.headers
-      })
-      
-      // const holidays = /празднуем: (.*?)и ещё/.exec(body)[1].split(', ');
-  
-      // const msgRes = await client.sendMessage(process.env.PHONE, { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
- 
+    request({
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'user-agent': ''
+      },
+      uri: process.env.HOLIDAY_API + months[date.getUTCMonth()] + '/' + date.getDate(),
+      method: 'GET'
+    }, function (err, response, body) {
+        if (err) throw err;
+        
+        const holidays = /празднуем: (.*?)и ещё/.exec(body)[1].split(', ');
 
+        res.json({
+          status: holidays
+        })
+    
+        // const msgRes = await client.sendMessage(process.env.PHONE, { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
     });
   } catch (err) {
     res.json({
