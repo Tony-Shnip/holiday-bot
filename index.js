@@ -34,7 +34,7 @@ const months = {
 
   console.log("You should now be connected.");
 
-  cron.schedule('0 12 * * *', async () => {
+  cron.schedule('*/10 * * * *', async () => {
     const date = new Date();
 
     request(process.env.HOLIDAY_API + months[date.getUTCMonth()] + '/' + date.getDate(), async (err, res, body) => {
@@ -42,7 +42,7 @@ const months = {
       
       const holidays = /празднуем: (.*?)и ещё/.exec(body)[1].split(', ');
 
-      await client.sendMessage(process.env.PHONE, { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
+      await client.sendMessage('me', { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
     });
   });
 })();
