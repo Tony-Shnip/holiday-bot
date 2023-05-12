@@ -4,32 +4,17 @@ const serverless = require("serverless-http");
 
 require('dotenv').config();
 
-const apiId = process.env.API_ID;
-const apiHash = process.env.API_HASH
-
-const months = {
-  0: "yanvar",
-  1: "fevral",
-  2: "mart",
-  3: "aprel",
-  4: "may",
-  5: "iyun",
-  6: "iyul",
-  7: "avgust",
-  8: "sentyabr",
-  9: "oktyabr",
-  10: "noyabr",
-  11: "dekabr"
-};
-
 const app = express();
 const router = express.Router();
 
 router.get("/start", async (req, res) => {
+  const iconv = require('iconv-lite');
   const { TelegramClient } = require("telegram");
   const { StringSession } = require("telegram/sessions");
   const request = require('request').defaults({strictSSL: false});
   
+  const apiId = process.env.API_ID;
+  const apiHash = process.env.API_HASH
   const stringSession = new StringSession(process.env.LOG_STRING);
   
   console.log("Loading interactive example...");
@@ -41,26 +26,20 @@ router.get("/start", async (req, res) => {
     await client.connect();
 
     console.log("You should now be connected.");
-  
-    const date = new Date();
 
     request({
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'user-agent': ''
-      },
-      uri: process.env.HOLIDAY_API + months[date.getUTCMonth()] + '/' + date.getDate(),
-      method: 'GET'
-    }, function (err, response, body) {
+      method: 'GET',
+      uri: process.env.HOLIDAY_API,
+      encoding: 'binary'
+    }, 
+      async function (err, response, body) {
         if (err) throw err;
-        
-        const holidays = /празднуем: (.*?)и ещё/.exec(body)[1].split(', ');
 
-        res.json({
-          status: holidays
-        })
+        const message = iconv.encode(iconv.decode(body, "cp1251"), "utf8").toString();
     
-        // const msgRes = await client.sendMessage(process.env.PHONE, { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
+        await client.sendMessage(process.env.PHONE, {message: message.split('<content>')[1].split('</content>')[0]});
+
+        res.send('Done')
     });
   } catch (err) {
     res.json({
