@@ -35,23 +35,29 @@ const app = express();
 const router = express.Router();
 
 router.get("/start", async (req, res) => {
-  await client.connect();
+  try {
+    await client.connect();
 
-  console.log("You should now be connected.");
+    console.log("You should now be connected.");
   
-  const date = new Date();
-
-  request(process.env.HOLIDAY_API + months[date.getUTCMonth()] + '/' + date.getDate(), async (err, res, body) => {
-    if (err) throw err;
-    
-    const holidays = /празднуем: (.*?)и ещё/.exec(body)[1].split(', ');
-
-    await client.sendMessage('me', { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
-  });
-
-  res.json({
-    status: 'OK'
-  })
+    const date = new Date();
+  
+    request(process.env.HOLIDAY_API + months[date.getUTCMonth()] + '/' + date.getDate(), async (err, res, body) => {
+      if (err) throw err;
+      
+      const holidays = /празднуем: (.*?)и ещё/.exec(body)[1].split(', ');
+  
+      await client.sendMessage('me', { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
+    });
+  
+    res.json({
+      status: 'OK'
+    })
+  } catch (err) {
+    res.json({
+      error: err
+    })
+  }
 });
 
 app.use(`/.netlify/functions/api`, router);
