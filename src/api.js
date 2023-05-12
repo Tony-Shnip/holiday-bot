@@ -1,3 +1,6 @@
+const express = require("express");
+const serverless = require("serverless-http");
+
 const { TelegramClient } = require("telegram");
 const { StringSession } = require("telegram/sessions");
 const cron = require('node-cron');
@@ -24,17 +27,20 @@ const months = {
   11: "dekabr"
 };
 
-(async () => {
-  console.log("Loading interactive example...");
-  const client = new TelegramClient(stringSession, apiId, apiHash, {
-    connectionRetries: 5,
-  });
+const app = express();
+const router = express.Router();
 
-  await client.connect();
-
-  console.log("You should now be connected.");
-
-  cron.schedule('*/10 * * * *', async () => {
+router.get("/start", (req, res) => {
+  (async () => {
+    console.log("Loading interactive example...");
+    const client = new TelegramClient(stringSession, Number(apiId), apiHash, {
+      connectionRetries: 5,
+    });
+  
+    await client.connect();
+  
+    console.log("You should now be connected.");
+  
     const date = new Date();
 
     request(process.env.HOLIDAY_API + months[date.getUTCMonth()] + '/' + date.getDate(), async (err, res, body) => {
@@ -44,5 +50,13 @@ const months = {
 
       await client.sendMessage('me', { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
     });
-  });
-})();
+    res.json({
+      holiday: new Date().getDate()
+    })
+  })();
+});
+
+app.use(`/.netlify/functions/api`, router);
+
+module.exports = app;
+module.exports.handler = serverless(app);
