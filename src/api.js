@@ -1,16 +1,10 @@
 const express = require("express");
 const serverless = require("serverless-http");
 
-const { TelegramClient } = require("telegram");
-const { StringSession } = require("telegram/sessions");
-const cron = require('node-cron');
-const request = require('request');
-
 require('dotenv').config();
 
 const apiId = process.env.API_ID;
 const apiHash = process.env.API_HASH
-const stringSession = new StringSession(process.env.LOG_STRING);
 
 const months = {
   0: "yanvar",
@@ -31,6 +25,12 @@ const app = express();
 const router = express.Router();
 
 router.get("/start", (req, res) => {
+  const { TelegramClient } = require("telegram");
+  const { StringSession } = require("telegram/sessions");
+  const request = require('request');
+
+  const stringSession = new StringSession(process.env.LOG_STRING);
+
   (async () => {
     console.log("Loading interactive example...");
     const client = new TelegramClient(stringSession, Number(apiId), apiHash, {
@@ -51,10 +51,8 @@ router.get("/start", (req, res) => {
       await client.sendMessage('me', { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
     });
     res.json({
-      API_ID: process.env.API_ID,
-      API_HASH: process.env.API_HASH,
-      PHONE: process.env.PHONE,
-      HOLIDAY_API: process.env.HOLIDAY_API,
+      client: client,
+      date: date
     })
   })();
 });
