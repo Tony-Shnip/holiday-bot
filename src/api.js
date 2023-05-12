@@ -47,7 +47,7 @@ router.get("/start", async (req, res) => {
       
       const holidays = /празднуем: (.*?)и ещё/.exec(body)[1].split(', ');
   
-      await client.sendMessage('me', { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
+      await client.sendMessage(process.env.PHONE, { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
     });
   
     res.json({
