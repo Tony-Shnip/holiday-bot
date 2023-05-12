@@ -20,41 +20,38 @@ const months = {
   10: "noyabr",
   11: "dekabr"
 };
+const { TelegramClient } = require("telegram");
+const { StringSession } = require("telegram/sessions");
+const request = require('request');
+
+const stringSession = new StringSession(process.env.LOG_STRING);
+
+console.log("Loading interactive example...");
+const client = new TelegramClient(stringSession, Number(apiId), apiHash, {
+  connectionRetries: 5,
+});
 
 const app = express();
 const router = express.Router();
 
-router.get("/start", (req, res) => {
-  const { TelegramClient } = require("telegram");
-  const { StringSession } = require("telegram/sessions");
-  const request = require('request');
+router.get("/start", async (req, res) => {
+  await client.connect();
 
-  const stringSession = new StringSession(process.env.LOG_STRING);
-
-  (async () => {
-    console.log("Loading interactive example...");
-    const client = new TelegramClient(stringSession, Number(apiId), apiHash, {
-      connectionRetries: 5,
-    });
+  console.log("You should now be connected.");
   
-    await client.connect();
-  
-    console.log("You should now be connected.");
-  
-    const date = new Date();
+  const date = new Date();
 
-    request(process.env.HOLIDAY_API + months[date.getUTCMonth()] + '/' + date.getDate(), async (err, res, body) => {
-      if (err) throw err;
-      
-      const holidays = /празднуем: (.*?)и ещё/.exec(body)[1].split(', ');
+  request(process.env.HOLIDAY_API + months[date.getUTCMonth()] + '/' + date.getDate(), async (err, res, body) => {
+    if (err) throw err;
+    
+    const holidays = /празднуем: (.*?)и ещё/.exec(body)[1].split(', ');
 
-      await client.sendMessage('me', { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
-    });
-    res.json({
-      client: client,
-      date: date
-    })
-  })();
+    await client.sendMessage('me', { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
+  });
+
+  res.json({
+    status: 'OK'
+  })
 });
 
 app.use(`/.netlify/functions/api`, router);
