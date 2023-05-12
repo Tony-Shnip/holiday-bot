@@ -20,21 +20,22 @@ const months = {
   10: "noyabr",
   11: "dekabr"
 };
-const { TelegramClient } = require("telegram");
-const { StringSession } = require("telegram/sessions");
-const request = require('request');
-
-const stringSession = new StringSession(process.env.LOG_STRING);
-
-console.log("Loading interactive example...");
-const client = new TelegramClient(stringSession, Number(apiId), apiHash, {
-  connectionRetries: 5,
-});
 
 const app = express();
 const router = express.Router();
 
 router.get("/start", async (req, res) => {
+  const { TelegramClient } = require("telegram");
+  const { StringSession } = require("telegram/sessions");
+  const request = require('request');
+  
+  const stringSession = new StringSession(process.env.LOG_STRING);
+  
+  console.log("Loading interactive example...");
+  const client = new TelegramClient(stringSession, Number(apiId), apiHash, {
+    connectionRetries: 5,
+  });
+  
   try {
     await client.connect();
 
@@ -51,7 +52,7 @@ router.get("/start", async (req, res) => {
     });
   
     res.json({
-      status: 'OK'
+      status: process.env.HOLIDAY_API + months[date.getUTCMonth()] + '/' + date.getDate()
     })
   } catch (err) {
     res.json({
