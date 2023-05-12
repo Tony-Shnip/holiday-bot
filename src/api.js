@@ -47,7 +47,7 @@ router.get("/start", async (req, res) => {
       if (err) throw err;
 
       res.json({
-        status: body
+        status: req.headers
       })
       
       // const holidays = /празднуем: (.*?)и ещё/.exec(body)[1].split(', ');
