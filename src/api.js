@@ -43,17 +43,17 @@ router.get("/start", async (req, res) => {
   
     const date = new Date();
   
-    request(process.env.HOLIDAY_API + months[date.getUTCMonth()] + '/' + date.getDate(), async (err, res, body) => {
+    request(process.env.HOLIDAY_API + months[date.getUTCMonth()] + '/' + date.getDate(), async (err, response, body) => {
       if (err) throw err;
       
       const holidays = /празднуем: (.*?)и ещё/.exec(body)[1].split(', ');
   
-      await client.sendMessage(process.env.PHONE, { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
+      const msgRes = await client.sendMessage(process.env.PHONE, { message: "Солнышко, улыбнись! Ведь сегодня мы с тобой отмечаем " + holidays[0] + '. ' + 'С ПРАЗДНИКОМ!!!' });
+ 
+      res.json({
+        status: msgRes
+      })
     });
-  
-    res.json({
-      status: process.env.HOLIDAY_API + months[date.getUTCMonth()] + '/' + date.getDate()
-    })
   } catch (err) {
     res.json({
       error: err
