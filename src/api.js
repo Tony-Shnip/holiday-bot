@@ -1,6 +1,7 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const express = require("express");
 const serverless = require("serverless-http");
+// const input = require("input");
 
 require('dotenv').config();
 
@@ -25,7 +26,16 @@ router.get("/start", async (req, res) => {
   try {
     await client.connect();
 
+    // await client.start({
+    //   phoneNumber: async () => await input.text("Please enter your number: "),
+    //   password: async () => await input.text("Please enter your password: "),
+    //   phoneCode: async () =>
+    //     await input.text("Please enter the code you received: "),
+    //   onError: (err) => console.log(err),
+    // });
+
     console.log("You should now be connected.");
+    console.log(client.session.save());
 
     request({
       method: 'GET',
